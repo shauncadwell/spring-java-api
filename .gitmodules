@@ -1,0 +1,3 @@
+[submodule "src/main/java/com/frostylog/spring/lib"]
+	path = src/main/java/com/frostylog/spring/lib
+	url = https://github.com/shauncadwell/spring-java-library
