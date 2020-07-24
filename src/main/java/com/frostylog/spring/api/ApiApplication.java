@@ -10,11 +10,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ApiApplication {
 
 	public static void main(String[] args) {
-		Person person = new Person();
-		person.setAddress("Address");
-		Hair hair = new Hair("brown", "short");
-		person.setHair(hair);
-		System.out.println(person);
+		// Person person = new Person();
+		// person.setAddress("Address");
+		// Hair hair = new Hair("brown", "short");
+		// person.setHair(hair);
+		// System.out.println(person);
 		SpringApplication.run(ApiApplication.class, args);
 	}
 
