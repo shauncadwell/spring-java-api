@@ -13,6 +13,9 @@ import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,27 +30,28 @@ import org.springframework.web.bind.annotation.RestController;
 public class GenericController {
 
     @CrossOrigin
-    @RequestMapping(value = "/ups/{trackingNumber}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
-    public String getOneFromUPS(@RequestParam final Optional<String> pParam, @PathVariable final String pTrackingNumber,
-            @RequestHeader final Map<String, String> pHeaders) throws IOException, InterruptedException {
+    @RequestMapping(value = "/ups/{pTrackingNumber}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
+    public JSONObject getOneFromUPS(@RequestParam final Optional<String> pParam,
+            @PathVariable final String pTrackingNumber, @RequestHeader final Map<String, String> pHeaders)
+            throws IOException, InterruptedException, ParseException {
 
         return getResponseFromUPS(pTrackingNumber, pParam, pHeaders);
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/ups/get", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
-    public List<String> getManyFromUPS(@RequestBody final List<String> pTrackingNumbers,
+    @RequestMapping(value = "/ups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
+    public List<JSONObject> getManyFromUPS(@RequestBody final List<String> pTrackingNumbers,
             @RequestParam final Optional<String> pParam, @RequestHeader final Map<String, String> pHeaders)
-            throws IOException, InterruptedException {
-        List<String> responseList = new ArrayList<>();
+            throws IOException, InterruptedException, ParseException {
+        List<JSONObject> responseList = new ArrayList<>();
         for (String trackingNumber : pTrackingNumbers) {
             responseList.add(getResponseFromUPS(trackingNumber, pParam, pHeaders));
         }
         return responseList;
     }
 
-    private String getResponseFromUPS(String pTrackingNumber, final Optional<String> pParam,
-            Map<String, String> pHeaders) throws IOException, InterruptedException {
+    private JSONObject getResponseFromUPS(String pTrackingNumber, final Optional<String> pParam,
+            Map<String, String> pHeaders) throws IOException, InterruptedException, ParseException {
         HttpResponse<String> response;
 
         if (pHeaders.containsKey("accesslicensenumber")) {
@@ -61,7 +65,8 @@ public class GenericController {
         } else {
             throw new RuntimeException("Header does not include AccessLicenseNumber");
         }
-        return response.body();
+        JSONParser parser = new JSONParser();
+        return (JSONObject) parser.parse(response.body());
     }
 
 }
