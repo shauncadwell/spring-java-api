@@ -28,7 +28,7 @@ public class GenericController {
 
     @CrossOrigin
     @RequestMapping(value = "/ups/{trackingNumber}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
-    public String getUPS(@RequestParam final Optional<String> pParam, @PathVariable final String pTrackingNumber,
+    public String getOneFromUPS(@RequestParam final Optional<String> pParam, @PathVariable final String pTrackingNumber,
             @RequestHeader final Map<String, String> pHeaders) throws IOException, InterruptedException {
 
         return getResponseFromUPS(pTrackingNumber, pParam, pHeaders);
@@ -36,7 +36,7 @@ public class GenericController {
 
     @CrossOrigin
     @RequestMapping(value = "/ups/get", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
-    public List<String> getUPSeses(@RequestBody final List<String> pTrackingNumbers,
+    public List<String> getManyFromUPS(@RequestBody final List<String> pTrackingNumbers,
             @RequestParam final Optional<String> pParam, @RequestHeader final Map<String, String> pHeaders)
             throws IOException, InterruptedException {
         List<String> responseList = new ArrayList<>();
