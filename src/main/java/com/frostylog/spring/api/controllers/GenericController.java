@@ -1,6 +1,6 @@
 package com.frostylog.spring.api.controllers;
 
-import com.frostylog.spring.lib.models.Person;
+import com.frostylog.spring.api.models.Person;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
