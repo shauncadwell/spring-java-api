@@ -9,8 +9,8 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GenericController {
 
+    @CrossOrigin
     @RequestMapping(value = "/ups/{trackingNumber}", method = RequestMethod.GET)
     public String getUPS(@RequestParam final Optional<String> pParam, @PathVariable final String trackingNumber,
             @RequestHeader final Map<String, String> pHeaders) throws IOException, InterruptedException {
@@ -45,6 +46,7 @@ public class GenericController {
         return response.body();
     }
 
+    @CrossOrigin
     @RequestMapping(value = "/ups/test", method = RequestMethod.GET)
     public String getTest() {
 
