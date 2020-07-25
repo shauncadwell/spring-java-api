@@ -17,17 +17,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.frostylog.spring.api.models.Person;
-
 @RequestMapping(value = "/api/v1/")
 @RestController
 public class GenericController {
-
-    @RequestMapping(value = "/person", method = RequestMethod.POST)
-    public Person getPersonByName(@RequestBody final Person pPerson) {
-        // Will echo object that is passed to it.
-        return pPerson;
-    }
 
     @RequestMapping(value = "/ups/{trackingNumber}", method = RequestMethod.GET)
     public String getUPS(@RequestParam final Optional<String> pParam, @PathVariable final String trackingNumber,
@@ -39,6 +31,7 @@ public class GenericController {
             String strUrl = "https://onlinetools.ups.com/track/v1/details/" + trackingNumber + "?locale=en_US";
             System.out.println("Full URL = " + strUrl);
             String accessLicenseNumber = pHeaders.get("accesslicensenumber");
+
             HttpClient client = HttpClient.newHttpClient();
 
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create(strUrl))
@@ -50,6 +43,12 @@ public class GenericController {
         }
 
         return response.body();
+    }
+
+    @RequestMapping(value = "/ups/test", method = RequestMethod.GET)
+    public String getTest() {
+
+        return "Test complete";
     }
 
 }
