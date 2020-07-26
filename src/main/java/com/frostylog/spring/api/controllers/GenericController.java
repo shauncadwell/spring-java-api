@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public class GenericController {
 
     @CrossOrigin
     @RequestMapping(value = "/ups/{pTrackingNumber}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
-    public JSONObject getOneFromUPS(@RequestParam final Optional<String> pParam,
+    public Map<Object, Object> getOneFromUPS(@RequestParam final Optional<String> pParam,
             @PathVariable final String pTrackingNumber, @RequestHeader final Map<String, String> pHeaders)
             throws IOException, InterruptedException, ParseException {
 
@@ -40,17 +41,17 @@ public class GenericController {
 
     @CrossOrigin
     @RequestMapping(value = "/ups", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
-    public List<JSONObject> getManyFromUPS(@RequestBody final List<String> pTrackingNumbers,
+    public List<Object> getManyFromUPS(@RequestBody final List<String> pTrackingNumbers,
             @RequestParam final Optional<String> pParam, @RequestHeader final Map<String, String> pHeaders)
             throws IOException, InterruptedException, ParseException {
-        List<JSONObject> responseList = new ArrayList<>();
+        List<Object> responseList = new ArrayList<>();
         for (String trackingNumber : pTrackingNumbers) {
             responseList.add(getResponseFromUPS(trackingNumber, pParam, pHeaders));
         }
         return responseList;
     }
 
-    private JSONObject getResponseFromUPS(String pTrackingNumber, final Optional<String> pParam,
+    private Map<Object, Object> getResponseFromUPS(String pTrackingNumber, final Optional<String> pParam,
             Map<String, String> pHeaders) throws IOException, InterruptedException, ParseException {
         HttpResponse<String> response;
 
@@ -66,7 +67,9 @@ public class GenericController {
             throw new RuntimeException("Header does not include AccessLicenseNumber");
         }
         JSONParser parser = new JSONParser();
-        return (JSONObject) parser.parse(response.body());
+        Map<Object, Object> responseBuilder = new HashMap<>();
+        responseBuilder.put(pTrackingNumber, (JSONObject) parser.parse(response.body()));
+        return responseBuilder;
     }
 
 }
