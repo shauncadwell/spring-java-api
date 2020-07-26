@@ -68,7 +68,8 @@ public class GenericController {
         }
         JSONParser parser = new JSONParser();
         Map<Object, Object> responseBuilder = new HashMap<>();
-        responseBuilder.put(pTrackingNumber, (JSONObject) parser.parse(response.body()));
+        responseBuilder.put("trackingNumber", pTrackingNumber);
+        responseBuilder.put("upsResponse", (JSONObject) parser.parse(response.body()));
         return responseBuilder;
     }
 
