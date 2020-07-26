@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GenericController {
 
     @CrossOrigin
-    @RequestMapping(value = "/ups/{pTrackingNumber}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
+    @RequestMapping(value = "/ups/{pTrackingNumber}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
     public JSONObject getOneFromUPS(@RequestParam final Optional<String> pParam,
             @PathVariable final String pTrackingNumber, @RequestHeader final Map<String, String> pHeaders)
             throws IOException, InterruptedException, ParseException {
@@ -39,7 +39,7 @@ public class GenericController {
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/ups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON)
+    @RequestMapping(value = "/ups", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
     public List<JSONObject> getManyFromUPS(@RequestBody final List<String> pTrackingNumbers,
             @RequestParam final Optional<String> pParam, @RequestHeader final Map<String, String> pHeaders)
             throws IOException, InterruptedException, ParseException {
