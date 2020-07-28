@@ -2,6 +2,8 @@ package com.frostylog.spring.api.models;
 
 import java.util.Optional;
 
+import com.frostylog.spring.api.models.usps.TrackResponse;
+
 public class TrackingData extends Object {
     private String trackingNumber;
     private String carrier;

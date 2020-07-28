@@ -14,9 +14,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
+import javax.xml.stream.XMLStreamException;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.frostylog.spring.api.models.TrackingData;
+import com.frostylog.spring.api.models.usps.TrackResponse;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -30,10 +33,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 @RequestMapping(value = "/api/v1/")
@@ -65,7 +66,7 @@ public class GenericController {
     @RequestMapping(value = "/tracking", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
     public List<Object> getTrackingData(@RequestBody final List<TrackingData> pTrackingNumbers,
             @RequestParam final Optional<String> pParam, @RequestHeader final Map<String, String> pHeaders)
-            throws IOException, InterruptedException, ParseException {
+            throws IOException, InterruptedException, ParseException, XMLStreamException {
         List<Object> responseList = new ArrayList<>();
         for (TrackingData data : pTrackingNumbers) {
             switch (data.getCarrier().toLowerCase()) {
@@ -84,7 +85,7 @@ public class GenericController {
                 default:
                     Map<Object, Object> responseBuilder = new HashMap<>();
                     responseBuilder.put("trackingNumber", data.getTrackingNumber());
-                    responseBuilder.put("Error: ", data.getCarrier().toLowerCase() + " is not a valid carrier.");
+                    responseBuilder.put("error: ", data.getCarrier().toLowerCase() + " is not a valid carrier.");
                     responseList.add(responseBuilder);
 
                     break;
@@ -108,21 +109,32 @@ public class GenericController {
     }
 
     private Object getResponseFromUSPS(String pTrackingNumber, Optional<String> pParam, Map<String, String> pHeaders)
-            throws IOException {
-        Map<Object, Object> responseBuilder = new HashMap<>();
-        XmlMapper mapper = new XmlMapper();
-        responseBuilder.put("trackingNumber", pTrackingNumber);
-        // responseBuilder.put("serverResponse", "USPS soap response... will need work
-        // :D");
-        String strRequest = "<TrackRequest USERID=\"015FROST5949\"><TrackID ID=\"9300120111404953153460\"></TrackID></TrackRequest>";
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
-        Request request = new Request.Builder()
-                .url("https://secure.shippingapis.com/ShippingAPI.dll?API=TrackV2&XML=" + strRequest)
-                .method("GET", null).build();
-        Response response = client.newCall(request).execute();
-        String xmlString = mapper.writeValueAsString(response.body().string());
-        responseBuilder.put("serverResponse", response.body().string());
-        return responseBuilder;
+            throws IOException, XMLStreamException {
+
+        if (pHeaders.containsKey("usps-userid")) {
+            String userId = pHeaders.get("usps-userid");
+            Map<Object, Object> responseBuilder = new HashMap<>();
+            XmlMapper mapper = new XmlMapper();
+            mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+            responseBuilder.put("trackingNumber", pTrackingNumber);
+            String strRequest = "<TrackRequest USERID=" + userId + "\"><TrackID ID=\"" + pTrackingNumber
+                    + "\"></TrackID></TrackRequest>";
+            OkHttpClient client = new OkHttpClient().newBuilder().build();
+            Request request = new Request.Builder()
+                    .url("https://secure.shippingapis.com/ShippingAPI.dll?API=TrackV2&XML=" + strRequest)
+                    .method("GET", null).build();
+            ResponseBody responseBody = client.newCall(request).execute().body();
+            InputStream inputStream = responseBody.byteStream();
+            TrackResponse trackResponse = mapper.readValue(inputStream, TrackResponse.class);
+
+            if (trackResponse.getTrackInfo() == null) {
+                responseBuilder.put("serverResponse", (Optional.of(client.newCall(request).execute().body().string())));
+                return responseBuilder;
+            }
+            responseBuilder.put("serverResponse", trackResponse);
+            return responseBuilder;
+        } else
+            throw new RuntimeException("Header does not include USERID as required by USPS.");
     }
 
     private Map<Object, Object> getResponseFromUPS(String pTrackingNumber, final Optional<String> pParam,
