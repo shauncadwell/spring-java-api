@@ -9,6 +9,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,9 +17,14 @@ import java.util.Optional;
 import javax.ws.rs.core.MediaType;
 import javax.xml.stream.XMLStreamException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.frostylog.spring.api.models.TrackingData;
+import com.frostylog.spring.api.models.temp.BarcodeAbstract;
+import com.frostylog.spring.api.models.temp.ProductBarcodeDto;
+import com.frostylog.spring.api.models.temp.SupplyBarcodeDto;
 import com.frostylog.spring.api.models.usps.TrackResponse;
 
 import org.json.simple.JSONObject;
@@ -159,4 +165,29 @@ public class GenericController {
         return responseBuilder;
     }
 
+    // http://localhost:8080/api/v1/test?type=product
+    @RequestMapping(value = "/test", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON)
+    public Object testStuff(@RequestBody LinkedHashMap<String, Object> test, @RequestParam String type)
+            throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        switch (type) {
+            case "product":
+                System.out.println("This is a product barcode dto...");
+                // convert to the correct type and pass it to the barcode generic service....
+                BarcodeAbstractService
+                        .createBarcode(mapper.readValue(mapper.writeValueAsString(test), ProductBarcodeDto.class));
+                break;
+            case "supply":
+                System.out.println("This is a supply barcode dto...");
+                BarcodeAbstractService
+                        .createBarcode(mapper.readValue(mapper.writeValueAsString(test), SupplyBarcodeDto.class));
+                break;
+            default:
+                break;
+        }
+
+        return "test";
+
+    }
 }
